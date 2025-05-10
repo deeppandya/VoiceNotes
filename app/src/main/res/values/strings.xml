@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">VoiceNotes</string>
+    <string name="recording_on">Recording on</string>
+    <string name="recording_off">Recording off</string>
 </resources>
