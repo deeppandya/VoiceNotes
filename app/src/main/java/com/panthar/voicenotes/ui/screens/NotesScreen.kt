@@ -46,6 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.domain.model.Note
+import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.ui.components.EmptyNotes
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,12 +57,18 @@ import java.util.Locale
 fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel = hiltViewModel()) {
     val notes by noteViewModel.notes.collectAsState()
     val context = LocalContext.current
-    var showDialog by remember {mutableStateOf(false)}
+    var showDialog by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<Note?>(null) }
+
+    if (notes.isEmpty()) {
+        EmptyNotes(onNewNoteClick = {
+            navController.navigate(Screen.Home.route)
+        })
+    }
 
     LazyColumn {
         items(notes.size) { index ->
-            ElevatedCard (
+            ElevatedCard(
                 modifier = Modifier
                     .padding(16.dp)
                     .clip(RoundedCornerShape(12.dp)),
@@ -170,37 +178,41 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmationDialog(onConfirm:() -> Unit, onDismiss: () -> Unit) {
+fun ConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
-        BasicAlertDialog(
-            onDismissRequest = onDismiss
+    BasicAlertDialog(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
-            Surface(
-                modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = context.getString(R.string.delete_confirmation_text)
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(modifier = Modifier.wrapContentSize().align(Alignment.End)) {
-                        TextButton(
-                            onClick = onDismiss
-                        ) {
-                            Text(context.getString(R.string.cancel))
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        TextButton(
-                            onClick = onConfirm
-                        ) {
-                            Text(context.getString(R.string.confirm))
-                        }
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = context.getString(R.string.delete_confirmation_text)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(modifier = Modifier
+                    .wrapContentSize()
+                    .align(Alignment.End)) {
+                    TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text(context.getString(R.string.cancel))
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    TextButton(
+                        onClick = onConfirm
+                    ) {
+                        Text(context.getString(R.string.confirm))
                     }
                 }
             }
         }
+    }
 }
 
 fun convertLongToTime(time: Long): String {

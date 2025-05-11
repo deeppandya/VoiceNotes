@@ -13,4 +13,7 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="delete_confirmation_text">Are you sure you want to delete the note ?</string>
+    <string name="no_notes">No notes</string>
+    <string name="no_notes_text">Get started by creating a new note.</string>
+    <string name="new_note">New note</string>
 </resources>
