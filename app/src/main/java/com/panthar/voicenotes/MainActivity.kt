@@ -15,7 +15,9 @@ import com.panthar.voicenotes.ui.components.NavigationTopBar
 import com.panthar.voicenotes.navigation.NoteAppNavHost
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.theme.VoiceNotesTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

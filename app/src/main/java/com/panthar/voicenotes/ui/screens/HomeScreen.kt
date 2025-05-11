@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,16 +39,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
+import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.util.SaveNewNote
 import com.panthar.voicenotes.util.startListeningLoop
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltViewModel()) {
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
-    var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
+    var recognizedText by remember { mutableStateOf("") }
     var shouldContinueListening by remember { mutableStateOf(false) }
     var isListening by remember { mutableStateOf(false) }
 
@@ -95,15 +98,17 @@ fun HomeScreen(navController: NavController) {
                 .background(Color.White)
         ) {
             Text(
-                text = recognizedText,
+                text = if (!recognizedText.isEmpty()) recognizedText else context.getString(R.string.tap_to_speak),
                 modifier = Modifier
                     .padding(8.dp)
                     .verticalScroll(rememberScrollState())
             )
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -154,13 +159,16 @@ fun HomeScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             SmallFloatingActionButton(
-                onClick = { },
+                onClick = {
+                    SaveNewNote(noteViewModel, recognizedText)
+                    recognizedText = ""
+                },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
-                containerColor = Color.LightGray,
+                containerColor = if (!isListening && !recognizedText.isEmpty()) Color.Green else Color.LightGray,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Filled.Delete, "Large floating action button")
+                Icon(Icons.Filled.Check, "Large floating action button")
             }
         }
     }

@@ -6,6 +6,7 @@ import com.panthar.voicenotes.data.local.NotesDatabase
 import com.panthar.voicenotes.data.repository.NoteRepositoryImpl
 import com.panthar.voicenotes.domain.repository.NoteRepository
 import com.panthar.voicenotes.domain.usecase.GetNotesUseCase
+import com.panthar.voicenotes.domain.usecase.SaveNoteUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,5 +41,11 @@ object NotesAppModule {
     @Singleton
     fun provideGetNotesUseCase(repository: NoteRepository): GetNotesUseCase {
         return GetNotesUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSaveNotesUseCase(repository: NoteRepository): SaveNoteUseCase {
+        return SaveNoteUseCase(repository)
     }
 }
