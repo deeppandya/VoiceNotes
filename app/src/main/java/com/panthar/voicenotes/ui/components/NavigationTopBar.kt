@@ -1,4 +1,4 @@
-package com.panthar.voicenotes.composables
+package com.panthar.voicenotes.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,13 +9,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import com.panthar.voicenotes.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit) {
+    val context = LocalContext.current
     CenterAlignedTopAppBar(
         title = {
-            Text("")
+            Text(context.getString(R.string.app_name))
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {

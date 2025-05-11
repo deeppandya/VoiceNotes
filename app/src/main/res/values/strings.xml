@@ -4,4 +4,7 @@
     <string name="recording_off">Recording off</string>
     <string name="tap_to_speak">Tap mic to speak</string>
     <string name="permission_denied">Permission denied</string>
+    <string name="home">Home</string>
+    <string name="notes">Notes</string>
+    <string name="settings">Settings</string>
 </resources>
