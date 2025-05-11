@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,14 +48,31 @@ import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.util.SaveNewNote
 import com.panthar.voicenotes.util.startListeningLoop
+import kotlinx.coroutines.delay
 
 @Composable
-fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltViewModel()) {
+fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
-    var recognizedText by remember { mutableStateOf("") }
+    var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
     var shouldContinueListening by remember { mutableStateOf(false) }
     var isListening by remember { mutableStateOf(false) }
+    var showCursor by remember { mutableStateOf(true) }
+    val scrollState = rememberScrollState()
+
+    // Launch blinking cursor loop while listening
+    LaunchedEffect(isListening) {
+        while (isListening) {
+            showCursor = !showCursor
+            delay(500)
+        }
+        showCursor = false
+    }
+
+    // Scroll to bottom when new text is added
+    LaunchedEffect(recognizedText) {
+        scrollState.animateScrollTo(scrollState.maxValue)
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -99,7 +117,7 @@ fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltV
                 .background(Color.White)
         ) {
             Text(
-                text = if (!recognizedText.isEmpty()) recognizedText else context.getString(R.string.tap_to_speak),
+                text = recognizedText + if (isListening && showCursor) "|" else "",
                 modifier = Modifier
                     .padding(8.dp)
                     .verticalScroll(rememberScrollState())
@@ -141,6 +159,7 @@ fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltV
                                 shouldContinue = { shouldContinueListening }
                             )
                             isListening = true
+                            recognizedText = ""
                         }
                     } else {
                         shouldContinueListening = false
@@ -167,7 +186,10 @@ fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltV
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
-                containerColor = if (!isListening && !recognizedText.isEmpty()) Color.Green else Color.LightGray,
+                containerColor = if (!isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
+                        context.getString(R.string.tap_to_speak)
+                    )
+                ) Color.Green else Color.LightGray,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Filled.Check, "Large floating action button")

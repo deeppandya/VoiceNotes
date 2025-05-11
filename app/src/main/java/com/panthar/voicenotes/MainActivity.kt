@@ -35,7 +35,7 @@ fun NotesApplicationContent() {
         Scaffold(
             topBar = {
                 NavigationTopBar(
-                    onBackPressed = {  },
+                    onBackPressed = { },
                     onAccountPressed = {})
             },
             bottomBar = { BottomNavigationBar(navController = navController)} ,
