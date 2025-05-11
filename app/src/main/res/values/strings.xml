@@ -7,4 +7,10 @@
     <string name="home">Home</string>
     <string name="notes">Notes</string>
     <string name="settings">Settings</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="are_you_sure">Are you sure ?</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_confirmation_text">Are you sure you want to delete the note ?</string>
 </resources>

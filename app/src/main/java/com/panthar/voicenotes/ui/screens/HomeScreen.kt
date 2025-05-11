@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
+import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.util.SaveNewNote
 import com.panthar.voicenotes.util.startListeningLoop
@@ -162,6 +163,7 @@ fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel= hiltV
                 onClick = {
                     SaveNewNote(noteViewModel, recognizedText)
                     recognizedText = ""
+                    navController.navigate(Screen.Notes.route)
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
