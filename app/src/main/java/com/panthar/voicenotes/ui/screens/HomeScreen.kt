@@ -23,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
@@ -49,12 +48,11 @@ import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.components.Timer
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.TimerViewModel
 import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
-import com.panthar.voicenotes.ui.theme.LightBlueVariant
 import com.panthar.voicenotes.ui.theme.RedVariant
-import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 import com.panthar.voicenotes.ui.theme.isDarkTheme
 import com.panthar.voicenotes.util.navigateTo
 import com.panthar.voicenotes.util.saveNewNote
@@ -174,15 +172,15 @@ fun HomeScreen(
             SmallFloatingActionButton(
                 onClick = {
                     if (hasNote) {
-
+                        recognizedText = context.getString(R.string.tap_to_speak)
                     }
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
-                containerColor = if (hasNote) LightBlueVariant else Color.LightGray,
+                containerColor = if (hasNote) RedVariant else Color.LightGray,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Filled.PlayArrow, "Large floating action button")
+                Icon(Icons.Filled.Delete, "Large floating action button")
             }
             Spacer(modifier = Modifier.width(8.dp))
             FloatingActionButton(
@@ -231,20 +229,6 @@ fun HomeScreen(
                     rememberAsyncImagePainter(if (isListening) android.R.drawable.ic_menu_close_clear_cancel else R.drawable.ic_baseline_mic_24),
                     "Large floating action button"
                 )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            SmallFloatingActionButton(
-                onClick = {
-                    if (hasNote) {
-                        recognizedText = context.getString(R.string.tap_to_speak)
-                    }
-                },
-                shape = CircleShape,
-                modifier = Modifier.size(40.dp),
-                containerColor = if (hasNote) RedVariant else Color.LightGray,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Filled.Delete, "Large floating action button")
             }
             Spacer(modifier = Modifier.width(8.dp))
             SmallFloatingActionButton(

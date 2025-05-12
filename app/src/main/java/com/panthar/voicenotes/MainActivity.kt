@@ -26,13 +26,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            NotesApplicationContent()
+            NotesApplicationContent(onBackPressed = {
+                finish()
+            })
         }
     }
 }
 
 @Composable
-fun NotesApplicationContent() {
+fun NotesApplicationContent(onBackPressed: () -> Unit) {
     val navController = rememberNavController()
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val noteViewModel: NoteViewModel = hiltViewModel()
@@ -40,11 +42,16 @@ fun NotesApplicationContent() {
         Scaffold(
             topBar = {
                 NavigationTopBar(
-                    onBackPressed = { },
+                    onBackPressed = {
+                        if (!navController.popBackStack()) {
+                            onBackPressed.invoke()
+                        }
+                    },
                     onAccountPressed = {},
-                    noteViewModel = noteViewModel)
+                    noteViewModel = noteViewModel
+                )
             },
-            bottomBar = { BottomNavigationBar(navController = navController)} ,
+            bottomBar = { BottomNavigationBar(navController = navController) },
             modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             NoteAppNavHost(
