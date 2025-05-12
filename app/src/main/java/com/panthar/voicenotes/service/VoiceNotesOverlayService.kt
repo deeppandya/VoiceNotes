@@ -12,20 +12,32 @@ import android.os.IBinder
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageButton
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.app.NotificationCompat
+import com.panthar.voicenotes.R
+import com.panthar.voicenotes.di.entrypoints.NoteUseCasesEntryPoint
+import com.panthar.voicenotes.domain.model.Note
 import com.panthar.voicenotes.util.startListeningLoop
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class VoiceNotesOverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var speechRecognizer: SpeechRecognizer
-    private lateinit var floatingButton: ImageButton
+
+    private lateinit var micIcon: ImageView
+    private lateinit var micIconContainer: View
+
     private lateinit var closeTarget: ImageView
 
     private lateinit var micParams: WindowManager.LayoutParams
@@ -34,6 +46,13 @@ class VoiceNotesOverlayService : Service() {
     private var isListening:Boolean = false
     private var currentUtterance:String = ""
     private var recognizedText:String = ""
+
+    private var isSave:Boolean = false
+
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+
+    private var finalNote: String = ""
 
     override fun onCreate() {
         super.onCreate()
@@ -68,20 +87,38 @@ class VoiceNotesOverlayService : Service() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setUpMicButton() {
-        floatingButton = ImageButton(this).apply {
-            setImageResource(com.panthar.voicenotes.R.drawable.ic_baseline_mic_24)
-            background = null
-        }
-
-        floatingButton.setOnClickListener {
+        micIconContainer = LayoutInflater.from(this)
+            .inflate(R.layout.overlay_layout, null, false) as FrameLayout
+        micIcon = micIconContainer.findViewById<ImageView>(R.id.micIcon)
+        micIconContainer.setOnClickListener {
             if (!isListening) {
-                startSpeechRecognition()
+                if (isSave) {
+                    isSave = false
+                    micIcon.setImageResource(R.drawable.ic_baseline_mic_24)
+                    micIconContainer.setBackgroundResource(R.drawable.mic_button_bg)
+                    val saveNoteUseCase = EntryPointAccessors.fromApplication(
+                        applicationContext,
+                        NoteUseCasesEntryPoint::class.java
+                    ).saveNoteUseCase()
+
+                    serviceScope.launch {
+                        val newNote = Note(
+                            title = getString(R.string.quick_hello),
+                            content = finalNote,
+                            timestamp = System.currentTimeMillis()
+                        )
+                        saveNoteUseCase.invoke(newNote)
+                        finalNote = ""
+                    }
+                } else {
+                    startSpeechRecognition()
+                }
             } else {
                 stopSpeechRecognition()
             }
         }
 
-        floatingButton.setOnTouchListener(object : View.OnTouchListener {
+        micIconContainer.setOnTouchListener(object : View.OnTouchListener {
             var initialX = 0
             var initialY = 0
             var touchX = 0f
@@ -105,14 +142,14 @@ class VoiceNotesOverlayService : Service() {
                         val dy = (event.rawY - touchY).toInt()
                         micParams.x = initialX + dx
                         micParams.y = initialY + dy
-                        windowManager.updateViewLayout(floatingButton, micParams)
+                        windowManager.updateViewLayout(micIconContainer, micParams)
                         moved = true
                         return true
                     }
 
                     MotionEvent.ACTION_UP -> {
                         hideCloseTarget()
-                        if (moved && isOverlapping(floatingButton, closeTarget)) {
+                        if (moved && isOverlapping(micIconContainer, closeTarget)) {
                             stopSelf()
                             return moved
                         } else {
@@ -137,16 +174,10 @@ class VoiceNotesOverlayService : Service() {
             y = 300
         }
 
-        windowManager.addView(floatingButton, micParams)
+        windowManager.addView(micIconContainer, micParams)
     }
 
     private fun startSpeechRecognition() {
-        if (this::speechRecognizer.isInitialized) {
-            speechRecognizer.stopListening()
-            speechRecognizer.cancel()
-            speechRecognizer.destroy()
-        }
-
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         startListeningLoop(
             speechRecognizer,
@@ -158,24 +189,34 @@ class VoiceNotesOverlayService : Service() {
             shouldContinue = { true })
         isListening = true
         recognizedText = ""
-        floatingButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        micIcon.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        micIconContainer.setBackgroundResource(R.drawable.clear_button_bg)
     }
 
     private fun stopSpeechRecognition() {
-        Log.e("SpeechRecord", "${recognizedText} ${currentUtterance}")
+        Log.e("SpeechRecord", "$recognizedText $currentUtterance")
+        finalNote = "$recognizedText $currentUtterance"
+        if (finalNote.isNotEmpty()) {
+            micIcon.setImageResource(R.drawable.ic_outline_check_24)
+            micIconContainer.setBackgroundResource(R.drawable.save_button_bg)
+            isSave = true
+        } else {
+            micIcon.setImageResource(R.drawable.ic_baseline_mic_24)
+            micIconContainer.setBackgroundResource(R.drawable.mic_button_bg)
+        }
         if (this::speechRecognizer.isInitialized) {
             speechRecognizer.stopListening()
             speechRecognizer.cancel()
             speechRecognizer.destroy()
         }
         isListening = false
-        floatingButton.setImageResource(com.panthar.voicenotes.R.drawable.ic_baseline_mic_24)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        serviceJob.cancel()
         try {
-            windowManager.removeView(floatingButton)
+            windowManager.removeView(micIconContainer)
             windowManager.removeView(closeTarget)
         } catch (_: Exception) {
         }
@@ -211,15 +252,15 @@ class VoiceNotesOverlayService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                getString(com.panthar.voicenotes.R.string.voice_notes_overlay),
+                getString(R.string.voice_notes_overlay),
                 NotificationManager.IMPORTANCE_LOW
             )
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(com.panthar.voicenotes.R.string.voice_notes_overlay_active))
-            .setSmallIcon(com.panthar.voicenotes.R.drawable.ic_baseline_mic_24).build()
+            .setContentTitle(getString(R.string.voice_notes_overlay_active))
+            .setSmallIcon(R.drawable.ic_baseline_mic_24).build()
 
         startForeground(1001, notification)
     }
