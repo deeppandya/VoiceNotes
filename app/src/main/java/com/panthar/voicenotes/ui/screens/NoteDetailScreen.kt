@@ -36,6 +36,7 @@ import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.theme.BlueVariant
 import com.panthar.voicenotes.util.navigateTo
+import com.panthar.voicenotes.util.updateNote
 
 @Composable
 fun NoteDetailScreen(
@@ -78,7 +79,9 @@ fun NoteDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Row(
@@ -90,6 +93,11 @@ fun NoteDetailScreen(
                         .background(BlueVariant)
                         .padding(8.dp)
                         .clickable(onClick = {
+                            it.title = title
+                            it.content = content
+                            updateNote(
+                                noteViewModel = noteViewModel, note = it
+                            )
                             navController.popBackStack()
                         })
                 ) {

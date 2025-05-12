@@ -17,6 +17,10 @@ class NoteRepositoryImpl(
         noteDao.delete(note)
     }
 
+    override suspend fun updateNote(note: Note) {
+        noteDao.update(note)
+    }
+
     override fun getAllNotes(): Flow<List<Note>> {
         return noteDao.getAllNotes()
     }

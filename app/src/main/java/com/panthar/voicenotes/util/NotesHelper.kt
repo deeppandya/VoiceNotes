@@ -13,3 +13,7 @@ fun saveNewNote(context:Context, noteViewModel: NoteViewModel, content : String)
     )
     noteViewModel.saveNote(newNote)
 }
+
+fun updateNote(noteViewModel: NoteViewModel, note:Note) {
+    noteViewModel.updateNote(note)
+}

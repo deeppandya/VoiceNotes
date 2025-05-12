@@ -8,6 +8,7 @@ import com.panthar.voicenotes.domain.usecase.DeleteNoteUseCase
 import com.panthar.voicenotes.domain.usecase.GetNoteByIdUseCase
 import com.panthar.voicenotes.domain.usecase.GetNotesUseCase
 import com.panthar.voicenotes.domain.usecase.SaveNoteUseCase
+import com.panthar.voicenotes.domain.usecase.UpdateNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +22,8 @@ class NoteViewModel @Inject constructor(
     getNotesUseCase: GetNotesUseCase,
     private val saveNoteUseCase: SaveNoteUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val getNoteByIdUseCase: GetNoteByIdUseCase
+    private val getNoteByIdUseCase: GetNoteByIdUseCase,
+    private val updateNoteUseCase:UpdateNoteUseCase
 ) : ViewModel() {
 
     // Holds the list of notes
@@ -38,6 +40,12 @@ class NoteViewModel @Inject constructor(
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             deleteNoteUseCase.invoke(note)
+        }
+    }
+
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            updateNoteUseCase.invoke(note)
         }
     }
 
