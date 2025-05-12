@@ -71,6 +71,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
+    var currentUtterance by remember { mutableStateOf("") }
     var shouldContinueListening by remember { mutableStateOf(false) }
     var isListening by remember { mutableStateOf(false) }
     val hasNote = !isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
@@ -105,11 +106,22 @@ fun HomeScreen(
     ) { granted ->
         if (granted) {
             shouldContinueListening = true
+            speechRecognizer.destroy()
             startListeningLoop(
                 speechRecognizer,
-                onPartial = { recognizedText = it },
-                onFinal = { recognizedText = it },
-                shouldContinue = { shouldContinueListening })
+                onPartial = { partialText ->
+                    currentUtterance = partialText
+                },
+                onFinal = { finalText ->
+                    if (recognizedText == context.getString(R.string.tap_to_speak)) {
+                        recognizedText = finalText
+                    } else {
+                        recognizedText += " $finalText"
+                    }
+                    currentUtterance = ""
+                },
+                shouldContinue = { shouldContinueListening }
+            )
             isListening = true
         } else {
             recognizedText = context.getString(R.string.permission_denied)
@@ -144,7 +156,7 @@ fun HomeScreen(
                 .background(if (isDarkTheme(themeMode)) Color.LightGray else Color.White)
         ) {
             Text(
-                text = recognizedText + if (isListening && showCursor) "|" else "",
+                text = ("$recognizedText $currentUtterance").trim() + if (isListening && showCursor) "|" else "",
                 modifier = Modifier
                     .padding(8.dp)
                     .verticalScroll(rememberScrollState()),
@@ -183,11 +195,22 @@ fun HomeScreen(
                             launcher.launch(Manifest.permission.RECORD_AUDIO)
                         } else {
                             shouldContinueListening = true
+                            speechRecognizer.destroy()
                             startListeningLoop(
                                 speechRecognizer,
-                                onPartial = { recognizedText = it },
-                                onFinal = { recognizedText = it },
-                                shouldContinue = { shouldContinueListening })
+                                onPartial = { partialText ->
+                                    currentUtterance = partialText
+                                },
+                                onFinal = { finalText ->
+                                    if (recognizedText == context.getString(R.string.tap_to_speak)) {
+                                        recognizedText = finalText
+                                    } else {
+                                        recognizedText += " $finalText"
+                                    }
+                                    currentUtterance = ""
+                                },
+                                shouldContinue = { shouldContinueListening }
+                            )
                             isListening = true
                             recognizedText = ""
                             timerViewModel.startTimer()

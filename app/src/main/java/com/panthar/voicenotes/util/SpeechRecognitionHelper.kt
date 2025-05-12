@@ -7,6 +7,9 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import java.util.Locale
 
+import android.os.Handler
+import android.os.Looper
+
 fun startListeningLoop(
     speechRecognizer: SpeechRecognizer,
     onPartial: (String) -> Unit,
@@ -20,6 +23,8 @@ fun startListeningLoop(
         putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
     }
 
+    val handler = Handler(Looper.getMainLooper())
+
     val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {}
         override fun onBeginningOfSpeech() {}
@@ -29,7 +34,9 @@ fun startListeningLoop(
 
         override fun onError(error: Int) {
             if (shouldContinue()) {
-                speechRecognizer.startListening(intent)
+                handler.postDelayed({
+                    speechRecognizer.startListening(intent)
+                }, 500) // 500ms delay to allow internal reset
             }
         }
 
@@ -37,7 +44,9 @@ fun startListeningLoop(
             val final = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             final?.get(0)?.let { onFinal(it) }
             if (shouldContinue()) {
-                speechRecognizer.startListening(intent)
+                handler.postDelayed({
+                    speechRecognizer.startListening(intent)
+                }, 500)
             }
         }
 
