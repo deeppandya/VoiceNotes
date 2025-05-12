@@ -42,11 +42,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.ui.components.Timer
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.TimerViewModel
 import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
 import com.panthar.voicenotes.ui.theme.LightBlueVariant
@@ -79,6 +82,9 @@ fun HomeScreen(
     val themeMode by themeViewModel.themeMode.collectAsState()
 
     noteViewModel.setTitle(context.getString(R.string.home))
+
+    val timerViewModel: TimerViewModel = hiltViewModel()
+    val timerValue by timerViewModel.timer.collectAsState()
 
     // Launch blinking cursor loop while listening
     LaunchedEffect(isListening) {
@@ -124,6 +130,8 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Text(context.getString(if (isListening) R.string.recording_on else R.string.recording_off))
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Timer(timerValue = timerValue)
         Spacer(modifier = Modifier.height(16.dp))
         Box(
             modifier = Modifier
@@ -182,11 +190,13 @@ fun HomeScreen(
                                 shouldContinue = { shouldContinueListening })
                             isListening = true
                             recognizedText = ""
+                            timerViewModel.startTimer()
                         }
                     } else {
                         shouldContinueListening = false
                         speechRecognizer.stopListening()
                         isListening = false
+                        timerViewModel.stopTimer()
                     }
                 },
                 shape = CircleShape,
