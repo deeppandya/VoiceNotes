@@ -1,6 +1,9 @@
 package com.panthar.voicenotes
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +22,8 @@ import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 import com.panthar.voicenotes.ui.theme.VoiceNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.net.toUri
+import com.panthar.voicenotes.service.VoiceNotesOverlayService
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -29,9 +34,36 @@ class MainActivity : ComponentActivity() {
             NotesApplicationContent(onBackPressed = {
                 finish()
             })
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    "package:$packageName".toUri()
+                )
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun finish() {
+        checkForOverlay()
+        super.finish()
+    }
+
+    override fun onDestroy() {
+        checkForOverlay()
+        super.onDestroy()
+    }
+
+    fun checkForOverlay() {
+        val intent = Intent(this, VoiceNotesOverlayService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 }
+
 
 @Composable
 fun NotesApplicationContent(onBackPressed: () -> Unit) {

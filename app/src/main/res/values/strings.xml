@@ -27,4 +27,6 @@
     <string name="system_default">System default</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
+    <string name="voice_notes_overlay">Voice notes overlay</string>
+    <string name="voice_notes_overlay_active">Voice notes overlay is active</string>
 </resources>
