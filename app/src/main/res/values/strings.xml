@@ -16,4 +16,9 @@
     <string name="no_notes">No notes</string>
     <string name="no_notes_text">Get started by creating a new note.</string>
     <string name="new_note">New note</string>
+    <string name="quick_hello">Quick hello</string>
+    <string name="title">Title</string>
+    <string name="note_content">Note content</string>
+    <string name="update_text_note">Update text note</string>
+    <string name="append_voice_note">Append voice note</string>
 </resources>

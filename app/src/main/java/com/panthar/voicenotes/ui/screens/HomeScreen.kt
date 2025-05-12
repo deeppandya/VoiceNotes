@@ -47,11 +47,16 @@ import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.util.SaveNewNote
+import com.panthar.voicenotes.util.navigateTo
 import com.panthar.voicenotes.util.startListeningLoop
 import kotlinx.coroutines.delay
 
 @Composable
-fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel = hiltViewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    noteViewModel: NoteViewModel = hiltViewModel(),
+    noteId: Int? = null
+) {
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
@@ -180,9 +185,9 @@ fun HomeScreen(navController: NavController, noteViewModel: NoteViewModel = hilt
             Spacer(modifier = Modifier.width(8.dp))
             SmallFloatingActionButton(
                 onClick = {
-                    SaveNewNote(noteViewModel, recognizedText)
+                    SaveNewNote(context, noteViewModel, recognizedText)
                     recognizedText = ""
-                    navController.navigate(Screen.Notes.route)
+                    navigateTo(navController, Screen.Notes.route)
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),

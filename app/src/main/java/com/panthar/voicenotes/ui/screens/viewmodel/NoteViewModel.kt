@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.panthar.voicenotes.domain.model.Note
 import com.panthar.voicenotes.domain.usecase.DeleteNoteUseCase
+import com.panthar.voicenotes.domain.usecase.GetNoteByIdUseCase
 import com.panthar.voicenotes.domain.usecase.GetNotesUseCase
 import com.panthar.voicenotes.domain.usecase.SaveNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,11 +19,13 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     getNotesUseCase: GetNotesUseCase,
     private val saveNoteUseCase: SaveNoteUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val getNoteByIdUseCase: GetNoteByIdUseCase
 ) : ViewModel() {
 
     // Holds the list of notes
-    val notes : StateFlow<List<Note>> = getNotesUseCase.invoke().stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+    val notes: StateFlow<List<Note>> = getNotesUseCase.invoke()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     // Function to save a new note
     fun saveNote(note: Note) {
@@ -35,5 +38,9 @@ class NoteViewModel @Inject constructor(
         viewModelScope.launch {
             deleteNoteUseCase.invoke(note)
         }
+    }
+
+    suspend fun getNoteById(id: Int): Note? {
+        return getNoteByIdUseCase.invoke(id)
     }
 }

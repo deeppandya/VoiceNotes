@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.util.navigateTo
 
 
 @Composable
@@ -46,11 +47,7 @@ fun BottomNavigationBar(navController: NavController) {
             icon = Icons.Default.Home,
             isSelected = currentRoute == Screen.Home.route,
             onClick = {
-                navController.navigate(Screen.Home.route) {
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navigateTo(navController, Screen.Home.route)
             }
         )
         BottomNavItem(
@@ -58,11 +55,7 @@ fun BottomNavigationBar(navController: NavController) {
             icon = Icons.AutoMirrored.Filled.List,
             isSelected = currentRoute == Screen.Notes.route,
             onClick = {
-                navController.navigate(Screen.Notes.route) {
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navigateTo(navController, Screen.Notes.route)
             }
         )
         BottomNavItem(
@@ -70,11 +63,7 @@ fun BottomNavigationBar(navController: NavController) {
             icon = Icons.Default.Settings,
             isSelected = currentRoute == Screen.Settings.route,
             onClick = {
-                navController.navigate(Screen.Settings.route) {
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navigateTo(navController, Screen.Settings.route)
             }
         )
     }

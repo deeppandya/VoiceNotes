@@ -49,6 +49,7 @@ import com.panthar.voicenotes.domain.model.Note
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.components.EmptyNotes
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.util.navigateTo
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,7 +63,7 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
 
     if (notes.isEmpty()) {
         EmptyNotes(onNewNoteClick = {
-            navController.navigate(Screen.Home.route)
+            navigateTo(navController, Screen.Home.route)
         })
     }
 
@@ -157,6 +158,12 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
                                 )
                                 .background(Color.Cyan)
                                 .padding(8.dp)
+                                .clickable(onClick = {
+                                    navigateTo(
+                                        navController,
+                                        (Screen.NoteDetail.route + "/${note.id}")
+                                    )
+                                })
                         ) {
                             Icon(
                                 Icons.Default.Edit,
@@ -195,13 +202,15 @@ fun ConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
                     text = context.getString(R.string.delete_confirmation_text)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Row(modifier = Modifier
-                    .wrapContentSize()
-                    .align(Alignment.End)) {
+                Row(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .align(Alignment.End)
+                ) {
                     TextButton(
                         onClick = onDismiss
                     ) {
-                        Text(context.getString(R.string.cancel))
+                        Text(context.getString(R.string.cancel), color = Color.DarkGray)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(

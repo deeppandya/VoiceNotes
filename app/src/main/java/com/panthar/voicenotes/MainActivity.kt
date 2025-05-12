@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.panthar.voicenotes.ui.components.BottomNavigationBar
 import com.panthar.voicenotes.ui.components.NavigationTopBar
 import com.panthar.voicenotes.navigation.NoteAppNavHost
 import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.ui.theme.ThemeViewModel
 import com.panthar.voicenotes.ui.theme.VoiceNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -31,7 +33,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NotesApplicationContent() {
     val navController = rememberNavController()
-    VoiceNotesTheme {
+    val themeViewModel: ThemeViewModel = hiltViewModel()
+    VoiceNotesTheme(themeViewModel = themeViewModel) {
         Scaffold(
             topBar = {
                 NavigationTopBar(
@@ -39,14 +42,15 @@ fun NotesApplicationContent() {
                     onAccountPressed = {})
             },
             bottomBar = { BottomNavigationBar(navController = navController)} ,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             NoteAppNavHost(
                 navController = navController,
                 startDestination = Screen.Home.route,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                themeViewModel = themeViewModel
             )
         }
     }

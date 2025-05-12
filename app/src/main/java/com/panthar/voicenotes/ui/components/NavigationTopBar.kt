@@ -14,7 +14,7 @@ import com.panthar.voicenotes.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit) {
+fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit, shouldShowAccount: Boolean = true) {
     val context = LocalContext.current
     CenterAlignedTopAppBar(
         title = {
@@ -29,11 +29,13 @@ fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit) {
             }
         },
         actions = {
-            IconButton(onClick = onAccountPressed) {
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "Localized description"
-                )
+            if (shouldShowAccount) {
+                IconButton(onClick = onAccountPressed) {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "Localized description",
+                    )
+                }
             }
         },
     )
