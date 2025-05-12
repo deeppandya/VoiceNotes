@@ -17,15 +17,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.util.navigateTo
@@ -36,10 +35,11 @@ fun BottomNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
 
     BottomAppBar(
-        containerColor = Color.White,
-        contentColor = Color.Black,
+        containerColor = colorScheme.surface,
+        contentColor = colorScheme.onSurface,
         modifier = Modifier.wrapContentHeight()
     ) {
         BottomNavItem(
@@ -76,7 +76,7 @@ fun RowScope.BottomNavItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val color = if (isSelected) Color.Blue else Color.Black
+    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = Modifier

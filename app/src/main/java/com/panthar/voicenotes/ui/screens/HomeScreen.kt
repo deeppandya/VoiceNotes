@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,30 +41,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
-import com.panthar.voicenotes.util.SaveNewNote
+import com.panthar.voicenotes.ui.theme.GreenVariant
+import com.panthar.voicenotes.ui.theme.IndigoVariant
+import com.panthar.voicenotes.ui.theme.LightBlueVariant
+import com.panthar.voicenotes.ui.theme.RedVariant
 import com.panthar.voicenotes.util.navigateTo
+import com.panthar.voicenotes.util.saveNewNote
 import com.panthar.voicenotes.util.startListeningLoop
 import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    noteViewModel: NoteViewModel = hiltViewModel(),
-    noteId: Int? = null
+    navController: NavController, noteViewModel: NoteViewModel, noteId: Int? = null
 ) {
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
     var shouldContinueListening by remember { mutableStateOf(false) }
     var isListening by remember { mutableStateOf(false) }
+    val hasNote = !isListening &&
+            recognizedText.isNotEmpty() &&
+            !recognizedText.contentEquals(context.getString(R.string.tap_to_speak))
     var showCursor by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
+
+    noteViewModel.setTitle(context.getString(R.string.home))
 
     // Launch blinking cursor loop while listening
     LaunchedEffect(isListening) {
@@ -88,8 +95,7 @@ fun HomeScreen(
                 speechRecognizer,
                 onPartial = { recognizedText = it },
                 onFinal = { recognizedText = it },
-                shouldContinue = { shouldContinueListening }
-            )
+                shouldContinue = { shouldContinueListening })
             isListening = true
         } else {
             recognizedText = context.getString(R.string.permission_denied)
@@ -105,7 +111,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .size(12.dp)
                     .clip(CircleShape)
-                    .background(if (isListening) Color.Red else Color.LightGray)
+                    .background(if (isListening) RedVariant else Color.LightGray)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(context.getString(if (isListening) R.string.recording_on else R.string.recording_off))
@@ -137,10 +143,14 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             SmallFloatingActionButton(
-                onClick = { },
+                onClick = {
+                    if (hasNote) {
+
+                    }
+                },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
-                containerColor = Color.LightGray,
+                containerColor = if (hasNote) LightBlueVariant else Color.LightGray,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Filled.PlayArrow, "Large floating action button")
@@ -150,8 +160,7 @@ fun HomeScreen(
                 onClick = {
                     if (!isListening) {
                         if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.RECORD_AUDIO
+                                context, Manifest.permission.RECORD_AUDIO
                             ) != PackageManager.PERMISSION_GRANTED
                         ) {
                             launcher.launch(Manifest.permission.RECORD_AUDIO)
@@ -161,8 +170,7 @@ fun HomeScreen(
                                 speechRecognizer,
                                 onPartial = { recognizedText = it },
                                 onFinal = { recognizedText = it },
-                                shouldContinue = { shouldContinueListening }
-                            )
+                                shouldContinue = { shouldContinueListening })
                             isListening = true
                             recognizedText = ""
                         }
@@ -174,7 +182,7 @@ fun HomeScreen(
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(80.dp),
-                containerColor = if (isListening) Color.Red else Color.Blue,
+                containerColor = if (isListening) RedVariant else IndigoVariant,
                 contentColor = Color.White
             ) {
                 Icon(
@@ -185,20 +193,65 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(8.dp))
             SmallFloatingActionButton(
                 onClick = {
-                    SaveNewNote(context, noteViewModel, recognizedText)
-                    recognizedText = ""
-                    navigateTo(navController, Screen.Notes.route)
+                    if (hasNote) {
+                        recognizedText = context.getString(R.string.tap_to_speak)
+                    }
                 },
                 shape = CircleShape,
                 modifier = Modifier.size(40.dp),
-                containerColor = if (!isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
-                        context.getString(R.string.tap_to_speak)
-                    )
-                ) Color.Green else Color.LightGray,
+                containerColor = if (hasNote) RedVariant else Color.LightGray,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Filled.Delete, "Large floating action button")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            SmallFloatingActionButton(
+                onClick = {
+                    if (hasNote) {
+                        saveNewNote(context, noteViewModel, recognizedText)
+                        recognizedText = context.getString(R.string.tap_to_speak)
+                        navigateTo(navController, Screen.Notes.route)
+                    }
+                },
+                shape = CircleShape,
+                modifier = Modifier.size(40.dp),
+                containerColor = if (hasNote) GreenVariant else Color.LightGray,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Filled.Check, "Large floating action button")
             }
         }
+//        Spacer(modifier = Modifier.width(8.dp))
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Center,
+//            modifier = Modifier
+//                .clip(
+//                    RoundedCornerShape(4.dp)
+//                )
+//                .background(
+//                    if (!isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
+//                            context.getString(R.string.tap_to_speak)
+//                        )
+//                    ) GreenVariant else Color.LightGray,
+//                )
+//                .padding(8.dp)
+//                .clickable(onClick = {
+//                    saveNewNote(context, noteViewModel, recognizedText)
+//                    recognizedText = ""
+//                    navigateTo(navController, Screen.Notes.route)
+//                })
+//        ) {
+//            Icon(
+//                Icons.Default.Add,
+//                tint = Color.White,
+//                contentDescription = null
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = context.getString(R.string.add_note),
+//                color = Color.White
+//            )
+//        }
     }
 }

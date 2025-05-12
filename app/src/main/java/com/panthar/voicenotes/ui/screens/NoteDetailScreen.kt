@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,23 +28,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.domain.model.Note
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.ui.theme.BlueVariant
 import com.panthar.voicenotes.util.navigateTo
 
 @Composable
 fun NoteDetailScreen(
     noteId: Int?,
     navController: NavHostController,
-    noteViewModel: NoteViewModel = hiltViewModel()
+    noteViewModel: NoteViewModel
 ) {
     var note by remember { mutableStateOf<Note?>(null) }
     val context = LocalContext.current
+    noteViewModel.setTitle(context.getString(R.string.note_details))
 
     LaunchedEffect(noteId) {
         note = noteId?.let { noteViewModel.getNoteById(it) }
@@ -77,7 +78,7 @@ fun NoteDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Row(
@@ -86,20 +87,20 @@ fun NoteDetailScreen(
                         .clip(
                             RoundedCornerShape(4.dp)
                         )
-                        .background(Color.Blue)
+                        .background(BlueVariant)
                         .padding(8.dp)
                         .clickable(onClick = {
                             navController.popBackStack()
                         })
                 ) {
                     Icon(
-                        Icons.Default.ThumbUp,
+                        Icons.Default.Edit,
                         tint = Color.White,
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = context.getString(R.string.update_text_note),
+                        text = context.getString(R.string.update_text),
                         color = Color.White
                     )
                 }
@@ -112,7 +113,7 @@ fun NoteDetailScreen(
                         .clip(
                             RoundedCornerShape(4.dp)
                         )
-                        .background(Color.Blue)
+                        .background(BlueVariant)
                         .padding(8.dp)
                         .clickable(onClick = {
                             navigateTo(navController, Screen.Home.route)
@@ -125,7 +126,7 @@ fun NoteDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = context.getString(R.string.append_voice_note),
+                        text = context.getString(R.string.append_voice),
                         color = Color.White
                     )
                 }

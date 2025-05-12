@@ -9,6 +9,7 @@ import com.panthar.voicenotes.domain.usecase.GetNoteByIdUseCase
 import com.panthar.voicenotes.domain.usecase.GetNotesUseCase
 import com.panthar.voicenotes.domain.usecase.SaveNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -42,5 +43,12 @@ class NoteViewModel @Inject constructor(
 
     suspend fun getNoteById(id: Int): Note? {
         return getNoteByIdUseCase.invoke(id)
+    }
+
+    private val _title = MutableStateFlow("")
+    val title: StateFlow<String> get() = _title
+
+    fun setTitle(title:String) {
+        _title.value = title
     }
 }

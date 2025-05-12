@@ -15,6 +15,7 @@ import com.panthar.voicenotes.ui.components.BottomNavigationBar
 import com.panthar.voicenotes.ui.components.NavigationTopBar
 import com.panthar.voicenotes.navigation.NoteAppNavHost
 import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.theme.ThemeViewModel
 import com.panthar.voicenotes.ui.theme.VoiceNotesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,12 +35,14 @@ class MainActivity : ComponentActivity() {
 fun NotesApplicationContent() {
     val navController = rememberNavController()
     val themeViewModel: ThemeViewModel = hiltViewModel()
+    val noteViewModel: NoteViewModel = hiltViewModel()
     VoiceNotesTheme(themeViewModel = themeViewModel) {
         Scaffold(
             topBar = {
                 NavigationTopBar(
                     onBackPressed = { },
-                    onAccountPressed = {})
+                    onAccountPressed = {},
+                    noteViewModel = noteViewModel)
             },
             bottomBar = { BottomNavigationBar(navController = navController)} ,
             modifier = Modifier.fillMaxSize(),
@@ -50,7 +53,8 @@ fun NotesApplicationContent() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                themeViewModel = themeViewModel
+                noteViewModel = noteViewModel,
+                themeViewModel = themeViewModel,
             )
         }
     }

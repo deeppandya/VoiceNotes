@@ -11,6 +11,7 @@ import com.panthar.voicenotes.ui.screens.HomeScreen
 import com.panthar.voicenotes.ui.screens.NoteDetailScreen
 import com.panthar.voicenotes.ui.screens.NotesScreen
 import com.panthar.voicenotes.ui.screens.SettingsScreen
+import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.theme.ThemeViewModel
 
 @Composable
@@ -18,6 +19,7 @@ fun NoteAppNavHost(
     navController: NavHostController,
     startDestination: String = Screen.Home.route,
     modifier: Modifier,
+    noteViewModel: NoteViewModel,
     themeViewModel: ThemeViewModel
 ) {
     NavHost(
@@ -26,27 +28,27 @@ fun NoteAppNavHost(
         modifier = modifier
     ) {
         composable(route = Screen.Home.route) {
-            HomeScreen(navController)
+            HomeScreen(navController, noteViewModel)
         }
         composable(
             route = Screen.Home.route + "/{noteId}",
             arguments = listOf(navArgument("noteId") { type = NavType.IntType })
         ) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getInt("noteId")
-            HomeScreen(navController = navController, noteId = noteId)
+            HomeScreen(navController = navController, noteId = noteId, noteViewModel = noteViewModel)
         }
         composable(route = Screen.Notes.route) {
-            NotesScreen(navController = navController)
+            NotesScreen(navController = navController, noteViewModel = noteViewModel)
         }
         composable(route = Screen.Settings.route) {
-            SettingsScreen(themeViewModel = themeViewModel)
+            SettingsScreen(themeViewModel = themeViewModel, noteViewModel = noteViewModel)
         }
         composable(
             route = Screen.NoteDetail.route + "/{noteId}",
             arguments = listOf(navArgument("noteId") { type = NavType.IntType })
         ) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getInt("noteId")
-            NoteDetailScreen(noteId = noteId, navController = navController)
+            NoteDetailScreen(noteId = noteId, navController = navController, noteViewModel = noteViewModel)
         }
     }
 }

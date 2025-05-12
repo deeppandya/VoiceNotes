@@ -9,16 +9,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.panthar.voicenotes.R
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit, shouldShowAccount: Boolean = true) {
-    val context = LocalContext.current
+fun NavigationTopBar(onBackPressed:() -> Unit, onAccountPressed:() -> Unit, shouldShowAccount: Boolean = true, noteViewModel: NoteViewModel) {
+    val title by noteViewModel.title.collectAsState()
     CenterAlignedTopAppBar(
         title = {
-            Text(context.getString(R.string.app_name))
+            Text(title)
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {

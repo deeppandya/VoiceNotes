@@ -19,6 +19,12 @@
     <string name="quick_hello">Quick hello</string>
     <string name="title">Title</string>
     <string name="note_content">Note content</string>
-    <string name="update_text_note">Update text note</string>
-    <string name="append_voice_note">Append voice note</string>
+    <string name="update_text">Update text</string>
+    <string name="append_voice">Append voice</string>
+    <string name="note_details">Note details</string>
+    <string name="add_note">Add note</string>
+    <string name="choose_theme">Choose theme</string>
+    <string name="system_default">System default</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
 </resources>

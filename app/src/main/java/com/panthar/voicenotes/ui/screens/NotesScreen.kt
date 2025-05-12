@@ -42,24 +42,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.domain.model.Note
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.components.EmptyNotes
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.ui.theme.BlueVariant
+import com.panthar.voicenotes.ui.theme.RedVariant
 import com.panthar.voicenotes.util.navigateTo
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel = hiltViewModel()) {
+fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel) {
     val notes by noteViewModel.notes.collectAsState()
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<Note?>(null) }
+    noteViewModel.setTitle(context.getString(R.string.notes))
 
     if (notes.isEmpty()) {
         EmptyNotes(onNewNoteClick = {
@@ -71,13 +73,13 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
         items(notes.size) { index ->
             ElevatedCard(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
                 ),
                 elevation = CardDefaults.cardElevation(
-                    defaultElevation = 50.dp
+                    defaultElevation = 8.dp
                 )
             ) {
                 val note: Note = notes[index]
@@ -131,7 +133,7 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
                                 .clip(
                                     RoundedCornerShape(4.dp)
                                 )
-                                .background(Color.Red)
+                                .background(RedVariant)
                                 .padding(8.dp)
                                 .clickable(onClick = {
                                     showDialog = true
@@ -143,7 +145,7 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
                                 tint = Color.White,
                                 contentDescription = null
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = context.getString(R.string.delete),
                                 color = Color.White
@@ -156,7 +158,7 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
                                 .clip(
                                     RoundedCornerShape(4.dp)
                                 )
-                                .background(Color.Cyan)
+                                .background(BlueVariant)
                                 .padding(8.dp)
                                 .clickable(onClick = {
                                     navigateTo(
@@ -170,7 +172,7 @@ fun NotesScreen(navController: NavHostController, noteViewModel: NoteViewModel =
                                 tint = Color.White,
                                 contentDescription = null
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = context.getString(R.string.edit),
                                 color = Color.White
@@ -210,7 +212,7 @@ fun ConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
                     TextButton(
                         onClick = onDismiss
                     ) {
-                        Text(context.getString(R.string.cancel), color = Color.DarkGray)
+                        Text(context.getString(R.string.cancel), color = MaterialTheme.colorScheme.secondary)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(
