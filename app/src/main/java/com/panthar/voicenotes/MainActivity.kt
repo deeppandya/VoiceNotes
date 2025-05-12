@@ -49,10 +49,10 @@ class MainActivity : ComponentActivity() {
         super.finish()
     }
 
-    override fun onDestroy() {
-        checkForOverlay()
-        super.onDestroy()
-    }
+//    override fun onDestroy() {
+//        checkForOverlay()
+//        super.onDestroy()
+//    }
 
     fun checkForOverlay() {
         val intent = Intent(this, VoiceNotesOverlayService::class.java)

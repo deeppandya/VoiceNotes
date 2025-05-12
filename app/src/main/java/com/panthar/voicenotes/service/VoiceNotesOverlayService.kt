@@ -28,9 +28,12 @@ class VoiceNotesOverlayService : Service() {
     private lateinit var floatingButton: ImageButton
     private lateinit var closeTarget: ImageView
 
-    private var isSpeechRecognitionActive = false
     private lateinit var micParams: WindowManager.LayoutParams
     private lateinit var closeParams: WindowManager.LayoutParams
+
+    private var isListening:Boolean = false
+    private var currentUtterance:String = ""
+    private var recognizedText:String = ""
 
     override fun onCreate() {
         super.onCreate()
@@ -71,7 +74,7 @@ class VoiceNotesOverlayService : Service() {
         }
 
         floatingButton.setOnClickListener {
-            if (!isSpeechRecognitionActive) {
+            if (!isListening) {
                 startSpeechRecognition()
             } else {
                 stopSpeechRecognition()
@@ -138,23 +141,34 @@ class VoiceNotesOverlayService : Service() {
     }
 
     private fun startSpeechRecognition() {
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        startListeningLoop(
-            speechRecognizer,
-            onPartial = { Log.d("Speech", "Partial: $it") },
-            onFinal = { Log.d("Speech", "Final: $it") },
-            shouldContinue = { true })
-        isSpeechRecognitionActive = true
-        floatingButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-    }
-
-    private fun stopSpeechRecognition() {
         if (this::speechRecognizer.isInitialized) {
             speechRecognizer.stopListening()
             speechRecognizer.cancel()
             speechRecognizer.destroy()
         }
-        isSpeechRecognitionActive = false
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        startListeningLoop(
+            speechRecognizer,
+            onPartial = { currentUtterance = it },
+            onFinal = {
+                recognizedText = "$recognizedText $it"
+                currentUtterance = ""
+            },
+            shouldContinue = { true })
+        isListening = true
+        recognizedText = ""
+        floatingButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+    }
+
+    private fun stopSpeechRecognition() {
+        Log.e("SpeechRecord", "${recognizedText} ${currentUtterance}")
+        if (this::speechRecognizer.isInitialized) {
+            speechRecognizer.stopListening()
+            speechRecognizer.cancel()
+            speechRecognizer.destroy()
+        }
+        isListening = false
         floatingButton.setImageResource(com.panthar.voicenotes.R.drawable.ic_baseline_mic_24)
     }
 

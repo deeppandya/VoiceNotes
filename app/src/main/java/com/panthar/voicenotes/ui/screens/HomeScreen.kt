@@ -48,6 +48,7 @@ import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.components.Timer
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.SpeechViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.TimerViewModel
 import com.panthar.voicenotes.ui.theme.GreenVariant
@@ -67,14 +68,15 @@ fun HomeScreen(
     noteId: Int? = null
 ) {
     val context = LocalContext.current
+
+    val speechViewModel: SpeechViewModel = hiltViewModel()
+
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
-    var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
-    var currentUtterance by remember { mutableStateOf("") }
+    val recognizedText by speechViewModel.recognizedText.collectAsState()
+    val isListening by speechViewModel.isListening.collectAsState()
+    val currentUtterance by speechViewModel.currentUtterance.collectAsState()
     var shouldContinueListening by remember { mutableStateOf(false) }
-    var isListening by remember { mutableStateOf(false) }
-    val hasNote = !isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
-        context.getString(R.string.tap_to_speak)
-    )
+    val hasNote = !isListening && recognizedText.isNotEmpty()
     var showCursor by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
@@ -108,21 +110,17 @@ fun HomeScreen(
             startListeningLoop(
                 speechRecognizer,
                 onPartial = { partialText ->
-                    currentUtterance = partialText
+                    speechViewModel.setCurrentUtterance(partialText)
                 },
                 onFinal = { finalText ->
-                    if (recognizedText == context.getString(R.string.tap_to_speak)) {
-                        recognizedText = finalText
-                    } else {
-                        recognizedText += " $finalText"
-                    }
-                    currentUtterance = ""
+                    speechViewModel.appendText(finalText)
+                    speechViewModel.clearCurrentUtterance()
                 },
                 shouldContinue = { shouldContinueListening }
             )
-            isListening = true
+            speechViewModel.setListening(true)
         } else {
-            recognizedText = context.getString(R.string.permission_denied)
+            speechViewModel.appendText(context.getString(R.string.permission_denied))
         }
     }
     Column {
@@ -172,7 +170,7 @@ fun HomeScreen(
             SmallFloatingActionButton(
                 onClick = {
                     if (hasNote) {
-                        recognizedText = context.getString(R.string.tap_to_speak)
+                        speechViewModel.resetText()
                     }
                 },
                 shape = CircleShape,
@@ -197,26 +195,22 @@ fun HomeScreen(
                             startListeningLoop(
                                 speechRecognizer,
                                 onPartial = { partialText ->
-                                    currentUtterance = partialText
+                                    speechViewModel.setCurrentUtterance(partialText)
                                 },
                                 onFinal = { finalText ->
-                                    if (recognizedText == context.getString(R.string.tap_to_speak)) {
-                                        recognizedText = finalText
-                                    } else {
-                                        recognizedText += " $finalText"
-                                    }
-                                    currentUtterance = ""
+                                    speechViewModel.appendText(finalText)
+                                    speechViewModel.clearCurrentUtterance()
                                 },
                                 shouldContinue = { shouldContinueListening }
                             )
-                            isListening = true
-                            recognizedText = ""
+                            speechViewModel.setListening(true)
+                            speechViewModel.resetText()
                             timerViewModel.startTimer()
                         }
                     } else {
                         shouldContinueListening = false
                         speechRecognizer.stopListening()
-                        isListening = false
+                        speechViewModel.setListening(false)
                         timerViewModel.stopTimer()
                     }
                 },
@@ -235,7 +229,7 @@ fun HomeScreen(
                 onClick = {
                     if (hasNote) {
                         saveNewNote(context, noteViewModel, recognizedText)
-                        recognizedText = context.getString(R.string.tap_to_speak)
+                        speechViewModel.resetText()
                         navigateTo(navController, Screen.Notes.route)
                     }
                 },
