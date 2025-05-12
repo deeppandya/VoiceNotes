@@ -30,6 +30,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +51,8 @@ import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
 import com.panthar.voicenotes.ui.theme.LightBlueVariant
 import com.panthar.voicenotes.ui.theme.RedVariant
+import com.panthar.voicenotes.ui.theme.ThemeViewModel
+import com.panthar.voicenotes.ui.theme.isDarkTheme
 import com.panthar.voicenotes.util.navigateTo
 import com.panthar.voicenotes.util.saveNewNote
 import com.panthar.voicenotes.util.startListeningLoop
@@ -57,18 +60,23 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
-    navController: NavController, noteViewModel: NoteViewModel, noteId: Int? = null
+    navController: NavController,
+    noteViewModel: NoteViewModel,
+    themeViewModel: ThemeViewModel,
+    noteId: Int? = null
 ) {
     val context = LocalContext.current
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     var recognizedText by remember { mutableStateOf(context.getString(R.string.tap_to_speak)) }
     var shouldContinueListening by remember { mutableStateOf(false) }
     var isListening by remember { mutableStateOf(false) }
-    val hasNote = !isListening &&
-            recognizedText.isNotEmpty() &&
-            !recognizedText.contentEquals(context.getString(R.string.tap_to_speak))
+    val hasNote = !isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
+        context.getString(R.string.tap_to_speak)
+    )
     var showCursor by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
+
+    val themeMode by themeViewModel.themeMode.collectAsState()
 
     noteViewModel.setTitle(context.getString(R.string.home))
 
@@ -111,7 +119,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .size(12.dp)
                     .clip(CircleShape)
-                    .background(if (isListening) RedVariant else Color.LightGray)
+                    .background(if (isListening && showCursor) RedVariant else Color.LightGray)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(context.getString(if (isListening) R.string.recording_on else R.string.recording_off))
@@ -125,13 +133,14 @@ fun HomeScreen(
                 .clip(
                     RoundedCornerShape(12.dp)
                 )
-                .background(Color.White)
+                .background(if (isDarkTheme(themeMode)) Color.LightGray else Color.White)
         ) {
             Text(
                 text = recognizedText + if (isListening && showCursor) "|" else "",
                 modifier = Modifier
                     .padding(8.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                color = if (isDarkTheme(themeMode)) Color.DarkGray else Color.Black
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
