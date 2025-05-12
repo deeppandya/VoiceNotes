@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.theme.ThemeMode
-import com.panthar.voicenotes.ui.theme.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 
 @Composable
 fun SettingsScreen(themeViewModel: ThemeViewModel, noteViewModel: NoteViewModel) {

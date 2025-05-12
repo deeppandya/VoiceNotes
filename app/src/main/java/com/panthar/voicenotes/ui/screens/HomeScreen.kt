@@ -54,7 +54,7 @@ import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
 import com.panthar.voicenotes.ui.theme.LightBlueVariant
 import com.panthar.voicenotes.ui.theme.RedVariant
-import com.panthar.voicenotes.ui.theme.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 import com.panthar.voicenotes.ui.theme.isDarkTheme
 import com.panthar.voicenotes.util.navigateTo
 import com.panthar.voicenotes.util.saveNewNote

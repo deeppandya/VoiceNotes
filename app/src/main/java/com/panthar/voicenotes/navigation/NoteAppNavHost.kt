@@ -12,7 +12,7 @@ import com.panthar.voicenotes.ui.screens.NoteDetailScreen
 import com.panthar.voicenotes.ui.screens.NotesScreen
 import com.panthar.voicenotes.ui.screens.SettingsScreen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
-import com.panthar.voicenotes.ui.theme.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
 
 @Composable
 fun NoteAppNavHost(
