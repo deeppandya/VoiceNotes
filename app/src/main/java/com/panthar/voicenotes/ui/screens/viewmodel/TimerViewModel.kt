@@ -28,8 +28,10 @@ class TimerViewModel @Inject constructor() : ViewModel() {
     }
 
     fun stopTimer() {
-        _timer.value = 0
-        timerJob?.cancel()
+        timerJob?.cancel()  // cancel the current job
+        if (timerJob?.isCancelled == true) {
+            _timer.value = 0
+        }
     }
 
     override fun onCleared() {
