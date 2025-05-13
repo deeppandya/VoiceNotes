@@ -38,7 +38,8 @@ class VoiceNotesOverlayService : Service() {
     private lateinit var micIcon: ImageView
     private lateinit var micIconContainer: View
 
-    private lateinit var closeTarget: ImageView
+    private lateinit var closeTargetIcon: ImageView
+    private lateinit var closeTargetContainer: View
 
     private lateinit var micParams: WindowManager.LayoutParams
     private lateinit var closeParams: WindowManager.LayoutParams
@@ -66,10 +67,12 @@ class VoiceNotesOverlayService : Service() {
     }
 
     private fun setUpCloseTarget() {
-        closeTarget = ImageView(this).apply {
-            setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-            visibility = View.GONE
-        }
+        closeTargetContainer = LayoutInflater.from(this)
+            .inflate(R.layout.overlay_layout, null, false) as FrameLayout
+        closeTargetIcon = closeTargetContainer.findViewById<ImageView>(R.id.micIcon)
+        closeTargetIcon.setImageResource(R.drawable.ic_outline_close_24)
+        closeTargetContainer.setBackgroundResource(R.drawable.clear_button_bg)
+        closeTargetContainer.visibility = View.GONE
 
         closeParams = WindowManager.LayoutParams(
             200,
@@ -82,7 +85,7 @@ class VoiceNotesOverlayService : Service() {
             y = 100
         }
 
-        windowManager.addView(closeTarget, closeParams)
+        windowManager.addView(closeTargetContainer, closeParams)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -149,7 +152,7 @@ class VoiceNotesOverlayService : Service() {
 
                     MotionEvent.ACTION_UP -> {
                         hideCloseTarget()
-                        if (moved && isOverlapping(micIconContainer, closeTarget)) {
+                        if (moved && isOverlapping(micIconContainer, closeTargetContainer)) {
                             stopSelf()
                             return moved
                         } else {
@@ -189,7 +192,7 @@ class VoiceNotesOverlayService : Service() {
             shouldContinue = { true })
         isListening = true
         recognizedText = ""
-        micIcon.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        micIcon.setImageResource(R.drawable.ic_outline_close_24)
         micIconContainer.setBackgroundResource(R.drawable.clear_button_bg)
     }
 
@@ -217,7 +220,7 @@ class VoiceNotesOverlayService : Service() {
         serviceJob.cancel()
         try {
             windowManager.removeView(micIconContainer)
-            windowManager.removeView(closeTarget)
+            windowManager.removeView(closeTargetContainer)
         } catch (_: Exception) {
         }
         if (this::speechRecognizer.isInitialized) {
@@ -226,13 +229,13 @@ class VoiceNotesOverlayService : Service() {
     }
 
     private fun showCloseTarget() {
-        closeTarget.visibility = View.VISIBLE
-        windowManager.updateViewLayout(closeTarget, closeParams)
+        closeTargetContainer.visibility = View.VISIBLE
+        windowManager.updateViewLayout(closeTargetContainer, closeParams)
     }
 
     private fun hideCloseTarget() {
-        closeTarget.visibility = View.GONE
-        windowManager.updateViewLayout(closeTarget, closeParams)
+        closeTargetContainer.visibility = View.GONE
+        windowManager.updateViewLayout(closeTargetContainer, closeParams)
     }
 
     private fun isOverlapping(view1: View, view2: View): Boolean {

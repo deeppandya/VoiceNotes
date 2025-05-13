@@ -1,7 +1,11 @@
 package com.panthar.voicenotes.ui.screens
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,10 +50,11 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.navigation.Screen
+import com.panthar.voicenotes.ui.components.ConfirmationDialog
 import com.panthar.voicenotes.ui.components.Timer
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.SpeechViewModel
-import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.SettingViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.TimerViewModel
 import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
@@ -64,7 +69,7 @@ import kotlinx.coroutines.delay
 fun HomeScreen(
     navController: NavController,
     noteViewModel: NoteViewModel,
-    themeViewModel: ThemeViewModel,
+    settingViewModel: SettingViewModel,
     noteId: Int? = null
 ) {
     val context = LocalContext.current
@@ -80,12 +85,25 @@ fun HomeScreen(
     var showCursor by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
-    val themeMode by themeViewModel.themeMode.collectAsState()
+    val themeMode by settingViewModel.themeMode.collectAsState()
 
     noteViewModel.setTitle(context.getString(R.string.home))
 
     val timerViewModel: TimerViewModel = hiltViewModel()
     val timerValue by timerViewModel.timer.collectAsState()
+
+    var showShowPermissionDialog by remember { mutableStateOf(false) }
+    if (showShowPermissionDialog) {
+        ConfirmationDialog(
+            title = context.getString(R.string.microphone_permission_title),
+            text = context.getString(R.string.microphone_permission_text),
+            confirmText = context.getString(R.string.go_to_settings),
+            onDismiss = { showShowPermissionDialog = false },
+            onConfirmClick = {
+                context.openAppSettings()
+                showShowPermissionDialog = false
+            })
+    }
 
     // Launch blinking cursor loop while listening
     LaunchedEffect(isListening) {
@@ -120,7 +138,7 @@ fun HomeScreen(
             )
             speechViewModel.setListening(true)
         } else {
-            speechViewModel.appendText(context.getString(R.string.permission_denied))
+            showShowPermissionDialog = true
         }
     }
     Column {
@@ -151,6 +169,14 @@ fun HomeScreen(
                 )
                 .background(if (isDarkTheme(themeMode)) Color.LightGray else Color.White)
         ) {
+            if (!isListening && recognizedText.isEmpty()) {
+                Text(
+                    text = context.getString(R.string.tap_to_speak),
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = if (isDarkTheme(themeMode)) Color.DarkGray else Color.Black
+                )
+            }
             Text(
                 text = ("$recognizedText $currentUtterance").trim() + if (isListening && showCursor) "|" else "",
                 modifier = Modifier
@@ -274,4 +300,11 @@ fun HomeScreen(
 //            )
 //        }
     }
+}
+
+fun Context.openAppSettings() {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", packageName, null)
+    }
+    startActivity(intent)
 }

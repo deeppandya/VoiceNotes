@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.SettingViewModel
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -28,7 +28,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun VoiceNotesTheme(
     dynamicColor: Boolean = true,
-    themeViewModel: ThemeViewModel,
+    themeViewModel: SettingViewModel,
     content: @Composable () -> Unit
 ) {
     val themeMode by themeViewModel.themeMode.collectAsState()

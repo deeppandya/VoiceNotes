@@ -7,7 +7,7 @@ import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
 
 fun saveNewNote(context:Context, noteViewModel: NoteViewModel, content : String) {
     val newNote = Note(
-        title = context.getString(R.string.quick_hello),
+        title = context.getString(R.string.casual_note),
         content = content,
         timestamp = System.currentTimeMillis()
     )

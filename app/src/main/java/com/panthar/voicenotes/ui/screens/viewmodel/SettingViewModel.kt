@@ -11,11 +11,12 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class ThemeViewModel @Inject constructor(
+class SettingViewModel @Inject constructor(
     @ApplicationContext
     context: Context
 ) : ViewModel() {
-    private val sharedPrefs = context.getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
+    private val sharedPrefs = context.getSharedPreferences("SettingsPref", Context.MODE_PRIVATE)
+
     private val _themeMode = MutableStateFlow(loadThemeMode())
     val themeMode: StateFlow<ThemeMode> get() = _themeMode
 
@@ -27,5 +28,17 @@ class ThemeViewModel @Inject constructor(
     private fun loadThemeMode(): ThemeMode {
         val saved = sharedPrefs.getString("theme_mode", ThemeMode.SYSTEM.name)
         return ThemeMode.valueOf(saved ?: ThemeMode.SYSTEM.name)
+    }
+
+    private val _speechBubble = MutableStateFlow(shouldShowSpeechBubble())
+    val speechBubble: StateFlow<Boolean> get() = _speechBubble
+
+    fun setSpeechBubble(shouldShowSpeechBubble : Boolean) {
+        _speechBubble.value = shouldShowSpeechBubble
+        sharedPrefs.edit { putBoolean("speech_bubble", shouldShowSpeechBubble) }
+    }
+
+    private fun shouldShowSpeechBubble(): Boolean {
+        return sharedPrefs.getBoolean("speech_bubble", false)
     }
 }

@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,12 +31,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.panthar.voicenotes.R
+import com.panthar.voicenotes.ui.screens.viewmodel.SettingViewModel
+import com.panthar.voicenotes.ui.theme.IndigoVariant
+import com.panthar.voicenotes.ui.theme.isDarkTheme
 
 @Composable
 fun EmptyNotes(
-    onNewNoteClick:() -> Unit
+    onNewNoteClick:() -> Unit, settingViewModel: SettingViewModel
 ) {
     val context = LocalContext.current
+
+    val themeMode by settingViewModel.themeMode.collectAsState()
+
     val stroke = Stroke(width = 2f,
         pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     )
@@ -55,7 +63,7 @@ fun EmptyNotes(
         ) {
             Icon(Icons.Default.Notifications, contentDescription = null)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = context.getString(R.string.no_notes), color = Color.Black)
+            Text(text = context.getString(R.string.no_notes), color = if (isDarkTheme(themeMode)) Color.White else Color.Black)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = context.getString(R.string.no_notes_text), color = Color.Gray)
             Spacer(modifier = Modifier.height(16.dp))
@@ -65,7 +73,7 @@ fun EmptyNotes(
                     .clip(
                         RoundedCornerShape(4.dp)
                     )
-                    .background(Color.Blue)
+                    .background(IndigoVariant)
                     .padding(8.dp)
                     .clickable(onClick = onNewNoteClick)
             ) {

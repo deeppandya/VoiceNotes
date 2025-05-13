@@ -12,7 +12,7 @@ import com.panthar.voicenotes.ui.screens.NoteDetailScreen
 import com.panthar.voicenotes.ui.screens.NotesScreen
 import com.panthar.voicenotes.ui.screens.SettingsScreen
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
-import com.panthar.voicenotes.ui.screens.viewmodel.ThemeViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.SettingViewModel
 
 @Composable
 fun NoteAppNavHost(
@@ -20,7 +20,7 @@ fun NoteAppNavHost(
     startDestination: String = Screen.Home.route,
     modifier: Modifier,
     noteViewModel: NoteViewModel,
-    themeViewModel: ThemeViewModel
+    settingViewModel: SettingViewModel
 ) {
     NavHost(
         navController = navController,
@@ -28,20 +28,20 @@ fun NoteAppNavHost(
         modifier = modifier
     ) {
         composable(route = Screen.Home.route) {
-            HomeScreen(navController, noteViewModel, themeViewModel)
+            HomeScreen(navController, noteViewModel, settingViewModel)
         }
         composable(
             route = Screen.Home.route + "/{noteId}",
             arguments = listOf(navArgument("noteId") { type = NavType.IntType })
         ) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getInt("noteId")
-            HomeScreen(navController = navController, noteId = noteId, noteViewModel = noteViewModel, themeViewModel = themeViewModel)
+            HomeScreen(navController = navController, noteId = noteId, noteViewModel = noteViewModel, settingViewModel = settingViewModel)
         }
         composable(route = Screen.Notes.route) {
-            NotesScreen(navController = navController, noteViewModel = noteViewModel)
+            NotesScreen(navController = navController, noteViewModel = noteViewModel, settingViewModel = settingViewModel)
         }
         composable(route = Screen.Settings.route) {
-            SettingsScreen(themeViewModel = themeViewModel, noteViewModel = noteViewModel)
+            SettingsScreen(settingViewModel = settingViewModel, noteViewModel = noteViewModel)
         }
         composable(
             route = Screen.NoteDetail.route + "/{noteId}",
