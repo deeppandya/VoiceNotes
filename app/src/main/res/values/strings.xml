@@ -29,7 +29,7 @@
     <string name="dark">Dark</string>
     <string name="voice_notes_overlay">Voice notes overlay</string>
     <string name="voice_notes_overlay_active">Voice notes overlay is active</string>
-    <string name="speech_bubble">Speech bubble</string>
+    <string name="speech_bubble">Floating Button After App Close</string>
     <string name="casual_note">Casual note</string>
     <string name="microphone_permission_title">Microphone permission is required</string>
     <string name="microphone_permission_text">Without microphone permission, you won\'t be able to create voice notes. please tap on \"Go to settings\" to enable the permission.</string>
