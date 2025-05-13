@@ -45,20 +45,20 @@ The app supports **Android 8.0 (API 26)** and above.
 This video showcases the main features of the app, including live speech recognition, note saving, and settings customization.
 
 #### Google Drive Link:
-[Watch Main Features Demo](https://drive.google.com/file/d/1J-NBO-dNSi2T3tDDO5V6zh1j2y74SsoO/view?usp=sharing)
+[Watch Main Features Demo](https://drive.google.com/file/d/1IzovZ14LjKqqoYm2nMOxLuqjSMPmdve0/view?usp=sharing)
 
 #### GitHub Download Link:
 Alternatively, download the video from the repository:
-[Download Main Features Demo from GitHub](https://github.com/deeppandya/VoiceNotes/blob/master/videos/screen-20250513-054959.mp4)
+[Download Main Features Demo from GitHub](https://github.com/deeppandya/VoiceNotes/blob/master/videos/main_feature_demo.mp4)
 
 ### 2. Floating Button Demo
 This video demonstrates how the floating mic button works, including how to start/stop recording and drag the button to the close zone to dismiss it.
 
 #### Google Drive Link:
-[Watch Floating Button Demo](https://drive.google.com/file/d/1IzovZ14LjKqqoYm2nMOxLuqjSMPmdve0/view?usp=sharing)
+[Watch Floating Button Demo](https://drive.google.com/file/d/1J-NBO-dNSi2T3tDDO5V6zh1j2y74SsoO/view?usp=sharing)
 
 #### GitHub Download Link:
 Alternatively, download the video from the repository:
-[Download Floating Button Demo from GitHub](https://github.com/deeppandya/VoiceNotes/blob/master/videos/screen-20250513-055544.mp4)
+[Download Floating Button Demo from GitHub](https://github.com/deeppandya/VoiceNotes/blob/master/videos/floating_button_demo.mp4)
 
 ---
