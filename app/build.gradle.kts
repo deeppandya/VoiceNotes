@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.panthar.voicenotes"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -72,7 +72,7 @@ dependencies {
 
     testImplementation(libs.mockk.mockk)
     testImplementation(libs.mockk.android)
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation(libs.mockito.kotlin)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
