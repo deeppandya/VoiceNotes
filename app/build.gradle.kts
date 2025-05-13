@@ -68,6 +68,12 @@ dependencies {
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    testImplementation(libs.mockk.mockk)
+    testImplementation(libs.mockk.android)
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
