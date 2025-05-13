@@ -35,4 +35,6 @@
     <string name="microphone_permission_text">Without microphone permission, you won\'t be able to create voice notes. please tap on \"Go to settings\" to enable the permission.</string>
     <string name="go_to_settings">Go to settings</string>
     <string name="delete_note">Delete note</string>
+    <string name="created_on">Created on :</string>
+    <string name="update_note_details">Update note details</string>
 </resources>

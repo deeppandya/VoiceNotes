@@ -35,20 +35,39 @@ fun NoteAppNavHost(
             arguments = listOf(navArgument("noteId") { type = NavType.IntType })
         ) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getInt("noteId")
-            HomeScreen(navController = navController, noteId = noteId, noteViewModel = noteViewModel, settingViewModel = settingViewModel)
+            HomeScreen(
+                navController = navController,
+                noteId = noteId,
+                noteViewModel = noteViewModel,
+                settingViewModel = settingViewModel
+            )
         }
         composable(route = Screen.Notes.route) {
-            NotesScreen(navController = navController, noteViewModel = noteViewModel, settingViewModel = settingViewModel)
+            NotesScreen(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                settingViewModel = settingViewModel
+            )
         }
         composable(route = Screen.Settings.route) {
             SettingsScreen(settingViewModel = settingViewModel, noteViewModel = noteViewModel)
         }
         composable(
-            route = Screen.NoteDetail.route + "/{noteId}",
-            arguments = listOf(navArgument("noteId") { type = NavType.IntType })
+            route = Screen.NoteDetail.route + "/{noteId}/{isEdit}",
+            arguments = listOf(
+                navArgument("noteId") { type = NavType.IntType },
+                navArgument("isEdit") { type = NavType.BoolType },
+            )
         ) { backStackEntry ->
             val noteId = backStackEntry.arguments?.getInt("noteId")
-            NoteDetailScreen(noteId = noteId, navController = navController, noteViewModel = noteViewModel)
+            val isEdit = backStackEntry.arguments?.getBoolean("isEdit") == true
+            NoteDetailScreen(
+                noteId = noteId,
+                navController = navController,
+                noteViewModel = noteViewModel,
+                settingViewModel = settingViewModel,
+                isEdit = isEdit
+            )
         }
     }
 }
