@@ -9,7 +9,6 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.os.Build
 import android.os.IBinder
-import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -22,18 +21,18 @@ import androidx.core.app.NotificationCompat
 import com.panthar.voicenotes.R
 import com.panthar.voicenotes.di.entrypoints.NoteUseCasesEntryPoint
 import com.panthar.voicenotes.domain.model.Note
-import com.panthar.voicenotes.util.startListeningLoop
+import com.panthar.voicenotes.util.SpeechRecognitionHelper
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @AndroidEntryPoint
 class VoiceNotesOverlayService : Service() {
     private lateinit var windowManager: WindowManager
-    private lateinit var speechRecognizer: SpeechRecognizer
 
     private lateinit var micIcon: ImageView
     private lateinit var micIconContainer: View
@@ -44,21 +43,34 @@ class VoiceNotesOverlayService : Service() {
     private lateinit var micParams: WindowManager.LayoutParams
     private lateinit var closeParams: WindowManager.LayoutParams
 
-    private var isListening:Boolean = false
-    private var currentUtterance:String = ""
-    private var recognizedText:String = ""
+    private var isListening: Boolean = false
+    private var currentUtterance: String = ""
+    private var recognizedText: String = ""
 
-    private var isSave:Boolean = false
+    private var isSave: Boolean = false
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     private var finalNote: String = ""
 
+    private lateinit var speechRecognitionHelper: SpeechRecognitionHelper
+    private val shouldContinueListening = AtomicBoolean(false)
+
     override fun onCreate() {
         super.onCreate()
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+
+        speechRecognitionHelper = SpeechRecognitionHelper(
+            context = applicationContext,
+            shouldContinue = { shouldContinueListening.get() },
+            onPartialResult = { partial -> currentUtterance = partial },
+            onFinalResult = { final ->
+                recognizedText = "$recognizedText $final"
+                currentUtterance = ""
+            }
+        )
 
         setUpMicButton()
         setUpCloseTarget()
@@ -68,7 +80,7 @@ class VoiceNotesOverlayService : Service() {
 
     private fun setUpCloseTarget() {
         closeTargetContainer = LayoutInflater.from(this)
-            .inflate(R.layout.overlay_layout, null, false) as FrameLayout
+            .inflate(R.layout.overlay_layout, FrameLayout(this), false) as FrameLayout
         closeTargetIcon = closeTargetContainer.findViewById<ImageView>(R.id.micIcon)
         closeTargetIcon.setImageResource(R.drawable.ic_outline_close_24)
         closeTargetContainer.setBackgroundResource(R.drawable.clear_button_bg)
@@ -91,7 +103,7 @@ class VoiceNotesOverlayService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setUpMicButton() {
         micIconContainer = LayoutInflater.from(this)
-            .inflate(R.layout.overlay_layout, null, false) as FrameLayout
+            .inflate(R.layout.overlay_layout, FrameLayout(this), false) as FrameLayout
         micIcon = micIconContainer.findViewById<ImageView>(R.id.micIcon)
         micIconContainer.setOnClickListener {
             if (!isListening) {
@@ -181,15 +193,8 @@ class VoiceNotesOverlayService : Service() {
     }
 
     private fun startSpeechRecognition() {
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        startListeningLoop(
-            speechRecognizer,
-            onPartial = { currentUtterance = it },
-            onFinal = {
-                recognizedText = "$recognizedText $it"
-                currentUtterance = ""
-            },
-            shouldContinue = { true })
+        shouldContinueListening.set(true)
+        speechRecognitionHelper.startListening()
         isListening = true
         recognizedText = ""
         micIcon.setImageResource(R.drawable.ic_outline_close_24)
@@ -198,6 +203,7 @@ class VoiceNotesOverlayService : Service() {
 
     private fun stopSpeechRecognition() {
         Log.e("SpeechRecord", "$recognizedText $currentUtterance")
+        shouldContinueListening.set(false)
         finalNote = "$recognizedText $currentUtterance"
         if (finalNote.isNotEmpty()) {
             micIcon.setImageResource(R.drawable.ic_outline_check_24)
@@ -207,25 +213,19 @@ class VoiceNotesOverlayService : Service() {
             micIcon.setImageResource(R.drawable.ic_baseline_mic_24)
             micIconContainer.setBackgroundResource(R.drawable.mic_button_bg)
         }
-        if (this::speechRecognizer.isInitialized) {
-            speechRecognizer.stopListening()
-            speechRecognizer.cancel()
-            speechRecognizer.destroy()
-        }
+        speechRecognitionHelper.stopListening()
         isListening = false
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         serviceJob.cancel()
         try {
             windowManager.removeView(micIconContainer)
             windowManager.removeView(closeTargetContainer)
         } catch (_: Exception) {
         }
-        if (this::speechRecognizer.isInitialized) {
-            speechRecognizer.destroy()
-        }
+        speechRecognitionHelper.destroy()
+        super.onDestroy()
     }
 
     private fun showCloseTarget() {
@@ -268,6 +268,7 @@ class VoiceNotesOverlayService : Service() {
         startForeground(1001, notification)
     }
 
+    @Suppress("DEPRECATION")
     private fun overlayType(): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         else WindowManager.LayoutParams.TYPE_PHONE

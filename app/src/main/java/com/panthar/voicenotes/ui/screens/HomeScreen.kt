@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -32,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,30 +53,28 @@ import com.panthar.voicenotes.navigation.Screen
 import com.panthar.voicenotes.ui.components.ConfirmationDialog
 import com.panthar.voicenotes.ui.components.Timer
 import com.panthar.voicenotes.ui.screens.viewmodel.NoteViewModel
-import com.panthar.voicenotes.ui.screens.viewmodel.SpeechViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.SettingViewModel
+import com.panthar.voicenotes.ui.screens.viewmodel.SpeechViewModel
 import com.panthar.voicenotes.ui.screens.viewmodel.TimerViewModel
 import com.panthar.voicenotes.ui.theme.GreenVariant
 import com.panthar.voicenotes.ui.theme.IndigoVariant
 import com.panthar.voicenotes.ui.theme.RedVariant
 import com.panthar.voicenotes.ui.theme.isDarkTheme
+import com.panthar.voicenotes.util.SpeechRecognitionHelper
 import com.panthar.voicenotes.util.navigateTo
 import com.panthar.voicenotes.util.saveNewNote
-import com.panthar.voicenotes.util.startListeningLoop
 import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     noteViewModel: NoteViewModel,
-    settingViewModel: SettingViewModel,
-    noteId: Int? = null
+    settingViewModel: SettingViewModel
 ) {
     val context = LocalContext.current
 
     val speechViewModel: SpeechViewModel = hiltViewModel()
 
-    val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     val recognizedText by speechViewModel.recognizedText.collectAsState()
     val isListening by speechViewModel.isListening.collectAsState()
     val currentUtterance by speechViewModel.currentUtterance.collectAsState()
@@ -91,6 +89,16 @@ fun HomeScreen(
 
     val timerViewModel: TimerViewModel = hiltViewModel()
     val timerValue by timerViewModel.timer.collectAsState()
+
+    val speechRecognitionHelper = SpeechRecognitionHelper(
+        context = context,
+        shouldContinue = { shouldContinueListening },
+        onPartialResult = { partial -> speechViewModel.setCurrentUtterance(partial) },
+        onFinalResult = { final ->
+            speechViewModel.appendText(final)
+            speechViewModel.clearCurrentUtterance()
+        }
+    )
 
     var showShowPermissionDialog by remember { mutableStateOf(false) }
     if (showShowPermissionDialog) {
@@ -124,19 +132,10 @@ fun HomeScreen(
     ) { granted ->
         if (granted) {
             shouldContinueListening = true
-            speechRecognizer.destroy()
-            startListeningLoop(
-                speechRecognizer,
-                onPartial = { partialText ->
-                    speechViewModel.setCurrentUtterance(partialText)
-                },
-                onFinal = { finalText ->
-                    speechViewModel.appendText(finalText)
-                    speechViewModel.clearCurrentUtterance()
-                },
-                shouldContinue = { shouldContinueListening }
-            )
+            speechRecognitionHelper.startListening()
             speechViewModel.setListening(true)
+            speechViewModel.resetText()
+            timerViewModel.startTimer()
         } else {
             showShowPermissionDialog = true
         }
@@ -217,25 +216,14 @@ fun HomeScreen(
                             launcher.launch(Manifest.permission.RECORD_AUDIO)
                         } else {
                             shouldContinueListening = true
-                            speechRecognizer.destroy()
-                            startListeningLoop(
-                                speechRecognizer,
-                                onPartial = { partialText ->
-                                    speechViewModel.setCurrentUtterance(partialText)
-                                },
-                                onFinal = { finalText ->
-                                    speechViewModel.appendText(finalText)
-                                    speechViewModel.clearCurrentUtterance()
-                                },
-                                shouldContinue = { shouldContinueListening }
-                            )
+                            speechRecognitionHelper.startListening()
                             speechViewModel.setListening(true)
                             speechViewModel.resetText()
                             timerViewModel.startTimer()
                         }
                     } else {
                         shouldContinueListening = false
-                        speechRecognizer.stopListening()
+                        speechRecognitionHelper.stopListening()
                         speechViewModel.setListening(false)
                         timerViewModel.stopTimer()
                     }
@@ -267,38 +255,11 @@ fun HomeScreen(
                 Icon(Icons.Filled.Check, "Large floating action button")
             }
         }
-//        Spacer(modifier = Modifier.width(8.dp))
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Center,
-//            modifier = Modifier
-//                .clip(
-//                    RoundedCornerShape(4.dp)
-//                )
-//                .background(
-//                    if (!isListening && recognizedText.isNotEmpty() && !recognizedText.contentEquals(
-//                            context.getString(R.string.tap_to_speak)
-//                        )
-//                    ) GreenVariant else Color.LightGray,
-//                )
-//                .padding(8.dp)
-//                .clickable(onClick = {
-//                    saveNewNote(context, noteViewModel, recognizedText)
-//                    recognizedText = ""
-//                    navigateTo(navController, Screen.Notes.route)
-//                })
-//        ) {
-//            Icon(
-//                Icons.Default.Add,
-//                tint = Color.White,
-//                contentDescription = null
-//            )
-//            Spacer(modifier = Modifier.height(4.dp))
-//            Text(
-//                text = context.getString(R.string.add_note),
-//                color = Color.White
-//            )
-//        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            speechRecognitionHelper.destroy()
+        }
     }
 }
 

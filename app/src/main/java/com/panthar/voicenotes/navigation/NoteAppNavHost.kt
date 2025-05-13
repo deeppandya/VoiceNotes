@@ -30,18 +30,6 @@ fun NoteAppNavHost(
         composable(route = Screen.Home.route) {
             HomeScreen(navController, noteViewModel, settingViewModel)
         }
-        composable(
-            route = Screen.Home.route + "/{noteId}",
-            arguments = listOf(navArgument("noteId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val noteId = backStackEntry.arguments?.getInt("noteId")
-            HomeScreen(
-                navController = navController,
-                noteId = noteId,
-                noteViewModel = noteViewModel,
-                settingViewModel = settingViewModel
-            )
-        }
         composable(route = Screen.Notes.route) {
             NotesScreen(
                 navController = navController,
